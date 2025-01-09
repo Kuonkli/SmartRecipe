@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"path/filepath"
 	"strconv"
 )
 
@@ -185,15 +186,50 @@ func PostMealPlanHandler(c *gin.Context) {
 }
 
 func PostRecipeImageHandler(c *gin.Context) {
-	var req *models.RecipeImage
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// Получаем файл из запроса
+	file, err := c.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No file uploaded"})
 		return
 	}
-	_, err := database.Database.RecipeImages.AddRecipeImage(req)
+
+	// Получаем recipe_id из формы
+	recipeId := c.PostForm("recipe_id")
+	if recipeId == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Recipe id is required"})
+		return
+	}
+
+	// Задаем путь для сохранения файла
+	filePath := filepath.Join("images", filepath.Base(file.Filename))
+
+	// Сохраняем файл
+	if err := c.SaveUploadedFile(file, filePath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
+		return
+	}
+
+	// Сохраняем путь к файлу в базе данных
+	var req models.RecipeImage
+	req.RecipeId, err = strconv.Atoi(recipeId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "incorrect recipe id"})
+	}
+	req.ImagePath = filePath
+
+	_, err = database.Database.RecipeImages.AddRecipeImage(&req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"message": "success"})
+
+	// Возвращаем успех и информацию о файле
+	c.JSON(http.StatusCreated, gin.H{
+		"message":   "File uploaded successfully",
+		"file_path": filePath,
+		"file_name": file.Filename,
+		"file_size": file.Size,
+		"file_type": file.Header.Get("Content-Type"),
+		"recipe_id": req.RecipeId,
+	})
 }

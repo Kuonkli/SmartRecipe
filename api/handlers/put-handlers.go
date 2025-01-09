@@ -59,12 +59,10 @@ func PutPersonalRecipe(c *gin.Context) {
 				return
 			}
 		}
-		if existingRecipe.Score != 0 {
-			err := database.Database.Recipes.UpdateScore(recipeId)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
+		err = database.Database.Recipes.UpdateScore(recipeId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "Recipe updated"})
 	} else {
@@ -79,12 +77,10 @@ func PutPersonalRecipe(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		if newRecipe.Score != 0 {
-			err := database.Database.Recipes.UpdateScore(recipeId)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
+		err := database.Database.Recipes.UpdateScore(recipeId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
 		c.JSON(http.StatusCreated, gin.H{"message": "New recipe added"})
 	}

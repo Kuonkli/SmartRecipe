@@ -11,17 +11,16 @@ import (
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString, err := c.Cookie("access_token")
-		if err != nil {
-			log.Println("Missing access token, attempting to refresh")
-			// Передаем исходный URL в параметре redirect_uri
-			redirectURL := c.Request.URL.Path
-			c.Redirect(http.StatusFound, "/o/refresh?redirect_uri="+redirectURL)
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			log.Println("Missing access token")
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing access token"})
 			c.Abort() // Остановить дальнейшую обработку
 			return
-		} else {
-			log.Println("Access token found")
 		}
+
+		tokenString := authHeader[len("Bearer "):]
+		log.Println("Access token found")
 
 		claims := &Claims{}
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {

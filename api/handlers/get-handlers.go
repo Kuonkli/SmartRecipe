@@ -26,19 +26,19 @@ func GetAuthPageHandler(c *gin.Context) {
 }
 
 func GetMainPageHandler(c *gin.Context) {
-	recipes, err := database.Database.Recipes.GetRecipes(3, "recent")
+	recipes, err := database.Database.Recipes.GetRecipes(6, "recent")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"message":        "success",
-		"recently_added": recipes,
+		"message": "success",
+		"recipes": recipes,
 	})
 }
 
 func GetRecipesHandler(c *gin.Context) {
-	limit, err := strconv.Atoi(c.DefaultQuery("limit", "1"))
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", "12"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -47,17 +47,17 @@ func GetRecipesHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Limit must be greater than 0"})
 		return
 	}
-	filter := c.Query("filter")
+	filter := c.DefaultQuery("filter", "")
 	search, exists := c.GetQuery("search")
 	var recipes []*models.Recipe
 	if !exists {
-		recipes, err = database.Database.Recipes.GetRecipes(limit*10, filter)
+		recipes, err = database.Database.Recipes.GetRecipes(limit, filter)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 	} else {
-		recipes, err = database.Database.Recipes.GetRecipesByTitle(limit*10, filter, search)
+		recipes, err = database.Database.Recipes.GetRecipesByTitle(limit, filter, search)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -69,9 +69,12 @@ func GetRecipesHandler(c *gin.Context) {
 			return
 		}
 	}
+	hasMore := len(recipes) >= limit
+
 	c.JSON(http.StatusOK, gin.H{
-		"message": "success",
-		"recipes": recipes,
+		"message":  "success",
+		"recipes":  recipes,
+		"has_more": hasMore,
 	})
 }
 
@@ -148,9 +151,13 @@ type coordinates struct {
 }
 
 type store struct {
-	Name     string  `json:"name"`
-	Address  string  `json:"address"`
-	Distance float64 `json:"distance"`
+	Name        string  `json:"name"`
+	Address     string  `json:"address"`
+	Distance    float64 `json:"distance"`
+	FullAddress []struct {
+		Name string   `json:"name"`
+		Kind []string `json:"kind"`
+	} `json:"full_address"`
 }
 
 type suggestResponse struct {
@@ -212,6 +219,10 @@ func GetNearestShopHandler(c *gin.Context) {
 	var nearestShop *models.Shop
 	var nearestShopDistance float64
 	var nearestShopAddress string
+	var nearestShopAddressComponents []struct {
+		Name string   `json:"name"`
+		Kind []string `json:"kind"`
+	}
 	for _, s := range stores {
 		id, err := database.Database.Shops.Exists(s.Name)
 		if err != nil {
@@ -226,12 +237,23 @@ func GetNearestShopHandler(c *gin.Context) {
 			}
 			nearestShopDistance = s.Distance
 			nearestShopAddress = s.Address
+			nearestShopAddressComponents = s.FullAddress
 			break
 		}
 	}
 	if nearestShop == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "No shop found"})
 		return
+	}
+
+	var nearestShopFullAddress string
+	for _, component := range nearestShopAddressComponents {
+		nearestShopFullAddress += component.Name + " "
+	}
+	nearestShopFullAddress = strings.Replace(nearestShopFullAddress, " ", "+", -1)
+	shopCoordinates, err := getCoordinates(nearestShopFullAddress)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 
 	recipeId, err := strconv.Atoi(c.Param("id"))
@@ -274,14 +296,16 @@ func GetNearestShopHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":    "success",
-		"shop_id":    nearestShop.Id,
-		"shop_name":  nearestShop.Name,
-		"distance":   nearestShopDistance,
-		"address":    nearestShopAddress,
-		"recipe":     recipe.Title,
-		"products":   res,
-		"cart_price": sum,
+		"message":            "success",
+		"shop_id":            nearestShop.Id,
+		"shop_name":          nearestShop.Name,
+		"distance":           nearestShopDistance,
+		"address":            nearestShopAddress,
+		"shop_coordinates":   shopCoordinates,
+		"client_coordinates": clientCoords,
+		"recipe":             recipe.Title,
+		"products":           res,
+		"cart_price":         sum,
 	})
 }
 
@@ -345,9 +369,10 @@ func getSuggestions(coords coordinates) ([]store, error) {
 	// Extract stores information from response
 	for _, item := range result.Results {
 		store := store{
-			Name:     item.Title.Text,
-			Address:  item.Address.FormattedAddress,
-			Distance: item.Distance.Value,
+			Name:        item.Title.Text,
+			Address:     item.Address.FormattedAddress,
+			Distance:    item.Distance.Value,
+			FullAddress: item.Address.Component,
 		}
 		stores = append(stores, store)
 	}
@@ -381,7 +406,7 @@ func GetUserProfileHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user info"})
 		return
 	}
-	c.HTML(http.StatusOK, "profile.html", gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"message": "success",
 		"user":    user,
 	})
@@ -398,7 +423,7 @@ func GetTriedRecipesHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID format"})
 		return
 	}
-	q := c.DefaultQuery("limit", "1")
+	q := c.DefaultQuery("limit", "3")
 	limit, err := strconv.Atoi(q)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -408,11 +433,11 @@ func GetTriedRecipesHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Limit must be greater than 0"})
 		return
 	}
-	triedRecipes, err := database.Database.PersonalRecipes.GetTriedRecipes(userId, limit*10)
+	triedRecipes, err := database.Database.PersonalRecipes.GetTriedRecipes(userId, limit)
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":       "success",
-		"tried_recipes": triedRecipes,
+		"message": "success",
+		"recipes": triedRecipes,
 	})
 }
 
@@ -427,7 +452,7 @@ func GetFavoriteRecipesHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID format"})
 		return
 	}
-	q := c.DefaultQuery("limit", "1")
+	q := c.DefaultQuery("limit", "3")
 	limit, err := strconv.Atoi(q)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -436,14 +461,14 @@ func GetFavoriteRecipesHandler(c *gin.Context) {
 	if limit < 1 {
 		limit = 1
 	}
-	favoriteRecipes, err := database.Database.PersonalRecipes.GetFavoriteRecipes(userId, limit*10)
+	favoriteRecipes, err := database.Database.PersonalRecipes.GetFavoriteRecipes(userId, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"message":          "success",
-		"favorite_recipes": favoriteRecipes,
+		"message": "success",
+		"recipes": favoriteRecipes,
 	})
 }
 
@@ -458,7 +483,7 @@ func GetRatedRecipesHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID format"})
 		return
 	}
-	q := c.DefaultQuery("limit", "1")
+	q := c.DefaultQuery("limit", "3")
 	limit, err := strconv.Atoi(q)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -467,14 +492,14 @@ func GetRatedRecipesHandler(c *gin.Context) {
 	if limit < 1 {
 		limit = 1
 	}
-	ratedRecipes, err := database.Database.PersonalRecipes.GetRatedRecipes(userId, limit*10)
+	ratedRecipes, err := database.Database.PersonalRecipes.GetRatedRecipes(userId, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"message":       "success",
-		"rated_recipes": ratedRecipes,
+		"message": "success",
+		"recipes": ratedRecipes,
 	})
 }
 

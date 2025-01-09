@@ -95,27 +95,12 @@ func SignUp(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate refresh token"})
 		return
 	}
-	// Сохранение токенов в куки
-	accessCookie := &http.Cookie{
-		Name:     "access_token",
-		Value:    accessTokenString,
-		Expires:  accessTokenExpirationTime,
-		HttpOnly: true,
-		Path:     "/",
-		Secure:   true,
-	}
-	refreshCookie := &http.Cookie{
-		Name:     "refresh_token",
-		Value:    refreshTokenString,
-		Expires:  refreshTokenExpirationTime,
-		HttpOnly: true,
-		Path:     "/",
-		Secure:   true,
-	}
-	http.SetCookie(c.Writer, accessCookie)
-	http.SetCookie(c.Writer, refreshCookie)
 
-	c.Redirect(http.StatusSeeOther, "/c/smart_recipe")
+	// Добавление токенов в заголовок ответа
+	c.Header("Authorization", "Bearer "+accessTokenString)
+	c.Header("X-Refresh-Token", refreshTokenString)
+
+	c.JSON(http.StatusCreated, gin.H{"message": "user created successfully"})
 }
 
 func Login(c *gin.Context) {
@@ -147,7 +132,7 @@ func Login(c *gin.Context) {
 	}
 
 	refreshClaims := &Claims{
-		UserID: strconv.Itoa(int(user.Id)),
+		UserID: strconv.Itoa(user.Id),
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: refreshTokenExpirationTime.Unix(),
 		},
@@ -167,56 +152,23 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// Сохранение access и refresh токенов в куки
-	accessCookie := &http.Cookie{
-		Name:     "access_token",
-		Value:    accessTokenString,
-		Expires:  accessTokenExpirationTime,
-		HttpOnly: true,
-		Path:     "/",
-		Secure:   true,
-	}
-	refreshCookie := &http.Cookie{
-		Name:     "refresh_token",
-		Value:    refreshTokenString,
-		Expires:  refreshTokenExpirationTime,
-		HttpOnly: true,
-		Path:     "/",
-		Secure:   true,
-	}
-	http.SetCookie(c.Writer, accessCookie)
-	http.SetCookie(c.Writer, refreshCookie)
+	// Добавление токенов в заголовок ответа
+	c.Header("Authorization", "Bearer "+accessTokenString)
+	c.Header("X-Refresh-Token", refreshTokenString)
 
-	c.Redirect(http.StatusSeeOther, "/c/smart_recipe")
+	c.JSON(http.StatusOK, gin.H{"message": "login successful"})
 }
 
 func Logout(c *gin.Context) {
-	accessCookie := &http.Cookie{
-		Name:     "access_token",
-		Value:    "",
-		Expires:  time.Now().Add(-time.Hour), // Устанавливаем срок действия в прошлое
-		HttpOnly: true,
-		Path:     "/",
-		Secure:   true,
-	}
-	refreshCookie := &http.Cookie{
-		Name:     "refresh_token",
-		Value:    "",
-		Expires:  time.Now().Add(-time.Hour), // Устанавливаем срок действия в прошлое
-		HttpOnly: true,
-		Path:     "/",
-		Secure:   true,
-	}
-	http.SetCookie(c.Writer, accessCookie)
-	http.SetCookie(c.Writer, refreshCookie)
-
-	c.Redirect(http.StatusSeeOther, "/o/auth")
+	// Логика для выхода пользователя - можем просто вернуть успешный ответ
+	c.JSON(http.StatusOK, gin.H{"message": "logout successful"})
 }
 
 func RefreshToken(c *gin.Context) {
-	refreshToken, err := c.Cookie("refresh_token")
-	if err != nil {
-		c.Redirect(http.StatusFound, "/o/auth")
+	refreshToken := c.GetHeader("X-Refresh-Token")
+	if refreshToken == "" {
+		log.Println("refresh token not provided")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "refresh token not provided"})
 		return
 	}
 
@@ -226,7 +178,8 @@ func RefreshToken(c *gin.Context) {
 	})
 
 	if err != nil || !token.Valid {
-		c.Redirect(http.StatusFound, "/o/auth")
+		log.Println("invalid refresh token")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid refresh token"})
 		return
 	}
 
@@ -245,15 +198,7 @@ func RefreshToken(c *gin.Context) {
 		return
 	}
 
-	accessCookie := &http.Cookie{
-		Name:     "access_token",
-		Value:    newAccessTokenString,
-		Expires:  newAccessTokenExpirationTime,
-		HttpOnly: true,
-		Path:     "/",
-		Secure:   true,
-	}
-	http.SetCookie(c.Writer, accessCookie)
-	redirectURI := c.DefaultQuery("redirect_uri", "/")
-	c.Redirect(http.StatusFound, redirectURI)
+	// Добавление нового access токена в заголовок ответа
+	c.Header("Authorization", "Bearer "+newAccessTokenString)
+	c.JSON(http.StatusOK, gin.H{"message": "token refreshed successfully"})
 }
