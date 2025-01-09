@@ -39,28 +39,24 @@ func (rt *RecipesTable) GetRecipes(limit int, filter string) ([]*models.Recipe, 
     FROM recipes`
 	if filter == "recent" {
 		query += `
-		ORDER BY id DESC
-		LIMIT $1`
+        ORDER BY id DESC
+        LIMIT $1`
 	} else if filter == "high-caloric" {
 		query += `
-		ORDER BY kilocalories DESC
-		LIMIT $1`
+        ORDER BY kilocalories DESC, id
+        LIMIT $1`
 	} else if filter == "low-caloric" {
 		query += `
-		ORDER BY kilocalories
-		LIMIT $1`
-	} else if filter == "title" {
-		query += `
-		ORDER BY title
-		LIMIT $1`
+        ORDER BY kilocalories, id
+        LIMIT $1`
 	} else if filter == "score" {
 		query += `
-		ORDER BY score DESC
-		LIMIT $1`
+        ORDER BY score DESC, id
+        LIMIT $1`
 	} else {
 		query += `
-		ORDER BY id
-    	LIMIT $1`
+        ORDER BY id
+        LIMIT $1`
 	}
 	rows, err := rt.db.Query(query, limit)
 	if err != nil {
@@ -103,15 +99,11 @@ func (rt *RecipesTable) GetRecipesByTitle(limit int, filter, search string) ([]*
 		LIMIT $2`
 	} else if filter == "high-caloric" {
 		query += `
-		ORDER BY kilocalories DESC
+		ORDER BY kilocalories DESC, id
 		LIMIT $2`
 	} else if filter == "low-caloric" {
 		query += `
-		ORDER BY kilocalories
-		LIMIT $2`
-	} else if filter == "title" {
-		query += `
-		ORDER BY title
+		ORDER BY kilocalories, id
 		LIMIT $2`
 	} else if filter == "score" {
 		query += `
@@ -230,35 +222,21 @@ func (rt *RecipesTable) EditRecipe(r *models.Recipe) error {
 
 func (rt *RecipesTable) UpdateScore(id int) error {
 	query := `
-        SELECT score 
+        SELECT AVG(score) 
         FROM personal_recipes 
-        WHERE recipe_id = $1`
-	rows, err := rt.db.Query(query, id)
-	if err != nil {
-		return fmt.Errorf("error updating recipe score: %v", err)
-	}
-	defer rows.Close()
+        WHERE recipe_id = $1 AND score != 0`
+	row := rt.db.QueryRow(query, id)
 
-	var sum, count int
-	for rows.Next() {
-		var score int
-		if err := rows.Scan(&score); err != nil {
-			return fmt.Errorf("error updating recipe score: %v", err)
-		}
-		sum += score
-		count++
+	var avg sql.NullFloat64
+	if err := row.Scan(&avg); err != nil {
+		return fmt.Errorf("error calculating average score: %v", err)
 	}
-	if err := rows.Err(); err != nil {
-		return fmt.Errorf("error updating recipe rows: %v", err)
+	averageScore := 0.0
+	if avg.Valid {
+		averageScore = avg.Float64
 	}
-
-	if count == 0 {
-		return fmt.Errorf("no scores found for recipe with id %d", id)
-	}
-
-	finalScore := float64(sum) / float64(count)
 	query = `UPDATE recipes SET score=$1 WHERE id=$2`
-	_, err = rt.db.Exec(query, finalScore, id)
+	_, err := rt.db.Exec(query, averageScore, id)
 	if err != nil {
 		return fmt.Errorf("error updating recipe score: %v", err)
 	}

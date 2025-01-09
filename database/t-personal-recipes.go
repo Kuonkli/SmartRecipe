@@ -104,6 +104,20 @@ func (prt *PersonalRecipesTable) GetTriedRecipes(userId int, limit int) ([]model
 		if err := rows.Scan(&recipe.Id, &recipe.Title, &recipe.Description, &recipe.Instructions, &recipe.Kilocalories, &recipe.Proteins, &recipe.Fats, &recipe.Carbohydrates, &recipe.Score); err != nil {
 			return nil, fmt.Errorf("error scanning tried recipe: %v", err)
 		}
+		imagesQuery := `SELECT id, recipe_id, image_path FROM recipe_images WHERE recipe_id = $1`
+		images, err := prt.db.Query(imagesQuery, recipe.Id)
+		if err != nil {
+			return nil, fmt.Errorf("error getting recipe images: %v", err)
+		}
+		var Images []*models.RecipeImage
+		for images.Next() {
+			var image models.RecipeImage
+			if err := images.Scan(&image.Id, &image.RecipeId, &image.ImagePath); err != nil {
+				return nil, fmt.Errorf("error scanning recipe image: %v", err)
+			}
+			Images = append(Images, &image)
+		}
+		recipe.Images = Images
 		recipes = append(recipes, recipe)
 	}
 
@@ -133,6 +147,20 @@ func (prt *PersonalRecipesTable) GetRatedRecipes(userId int, limit int) ([]model
 		if err := rows.Scan(&recipe.Id, &recipe.Title, &recipe.Description, &recipe.Instructions, &recipe.Kilocalories, &recipe.Proteins, &recipe.Fats, &recipe.Carbohydrates, &recipe.Score); err != nil {
 			return nil, fmt.Errorf("error scanning rated recipe: %v", err)
 		}
+		imagesQuery := `SELECT id, recipe_id, image_path FROM recipe_images WHERE recipe_id = $1`
+		images, err := prt.db.Query(imagesQuery, recipe.Id)
+		if err != nil {
+			return nil, fmt.Errorf("error getting recipe images: %v", err)
+		}
+		var Images []*models.RecipeImage
+		for images.Next() {
+			var image models.RecipeImage
+			if err := images.Scan(&image.Id, &image.RecipeId, &image.ImagePath); err != nil {
+				return nil, fmt.Errorf("error scanning recipe image: %v", err)
+			}
+			Images = append(Images, &image)
+		}
+		recipe.Images = Images
 		recipes = append(recipes, recipe)
 	}
 
@@ -162,6 +190,20 @@ func (prt *PersonalRecipesTable) GetFavoriteRecipes(userId int, limit int) ([]mo
 		if err := rows.Scan(&recipe.Id, &recipe.Title, &recipe.Description, &recipe.Instructions, &recipe.Kilocalories, &recipe.Proteins, &recipe.Fats, &recipe.Carbohydrates, &recipe.Score); err != nil {
 			return nil, fmt.Errorf("error scanning favorite recipe: %v", err)
 		}
+		imagesQuery := `SELECT id, recipe_id, image_path FROM recipe_images WHERE recipe_id = $1`
+		images, err := prt.db.Query(imagesQuery, recipe.Id)
+		if err != nil {
+			return nil, fmt.Errorf("error getting recipe images: %v", err)
+		}
+		var Images []*models.RecipeImage
+		for images.Next() {
+			var image models.RecipeImage
+			if err := images.Scan(&image.Id, &image.RecipeId, &image.ImagePath); err != nil {
+				return nil, fmt.Errorf("error scanning recipe image: %v", err)
+			}
+			Images = append(Images, &image)
+		}
+		recipe.Images = Images
 		recipes = append(recipes, recipe)
 	}
 
