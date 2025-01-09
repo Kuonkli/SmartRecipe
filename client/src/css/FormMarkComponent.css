@@ -1,0 +1,108 @@
+.no-scroll {
+    overflow: hidden;
+}
+
+.add-mark-form {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 30%;
+    left: 35%;
+    width: max-content;
+    height: fit-content;
+    border: 1px solid #12a370;
+    border-radius: 10px;
+    background-color: #fff;
+    font-size: clamp(12px, 1.1vw, 18px);
+    z-index: 1001;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.form-data {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5vw;
+    text-align: center;
+}
+
+.close-form-icon {
+    text-align: right;
+    width: 100%;
+    font-size: clamp(12px, 2vw, 21px);
+    cursor: pointer;
+}
+
+.form-data h2 {
+    font-size: clamp(14px, 2.5vw, 25px);
+    margin: 1vw 0;
+}
+
+.stars-form-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-top: auto;
+}
+
+.stars-select-container {
+    display: flex;
+}
+
+.star {
+    font-size: clamp(22px, 3vw, 40px);
+    cursor: pointer;
+    color: #aaa;
+    transition: color 0.3s, transform 0.3s;
+    margin: 0 0.2vw;
+}
+
+.star.filled {
+    color: #ffa500;
+    transform: scale(1.2);
+}
+
+.mark-form-button-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 1.5vw 3vw;
+}
+
+.edit-save-mark-form-btn {
+    background: #12a370;
+    color: white;
+    border: 1px solid #12a370;
+    border-radius: 1.5vw;
+    font-size: clamp(11px, 1.2vw, 21px);
+    padding: 0.8vw 1.2vw;
+    cursor: pointer;
+}
+
+.delete-mark-btn {
+    background: white;
+    color: #12a370;
+    border: 1px solid #fa5252;
+    border-radius: 1.5vw;
+    padding: 0.8vw;
+    margin-left: 3vw;
+    cursor: pointer;
+}
+
+.delete-mark-btn img {
+    width: 1.8vw;
+}
+
+.form-background {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.7);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+}

@@ -1,0 +1,199 @@
+.head-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 5vw;
+}
+
+.head-container h1 {
+    font-size: clamp(20px, 2.5vw, 30px);
+}
+
+.search-sort-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.search {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    margin-right: 1vw;
+}
+
+.search-button {
+    display: flex;
+    align-items: center;
+    background: #12a370;
+    color: white;
+    border: 1px solid #12a370;
+    border-radius: 20px;
+    padding: 1vw;
+    margin-left: 1vw;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.search-button:hover {
+    cursor: pointer;
+    background-color: #0e8c65;
+}
+
+.search-button svg {
+    width: clamp(15px, 1.5vw, 24px);
+    height: clamp(15px, 1.5vw, 24px);
+}
+
+.search-bar {
+    border: 2px solid #12a370;
+    border-radius: 20px;
+    padding: 1vw;
+    font-size: clamp(14px, 1.2vw, 21px);
+}
+
+input::placeholder {
+    font-size: clamp(14px, 1.2vw, 21px);
+}
+
+.sort {
+    position: relative;
+    display: inline-block;
+}
+
+.sort-btn {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5vw;
+    padding: 1vw;
+    border: 1px solid #12a370;
+    border-radius: 20px;
+    background-color: #12a370;
+    color: white;
+    cursor: pointer;
+    outline: none;
+    transition: background-color 0.3s ease-in-out;
+    min-width: 13vw;
+}
+
+.sort-option-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.sort-btn p {
+    margin-block-start: 0;
+    margin-block-end: 0;
+    font-size: clamp(12px, 1.2vw, 21px);
+}
+
+.sort-btn:hover {
+    background-color: #0e8c65;
+}
+
+.sort-btn img {
+    display: none;
+    width: clamp(15px, 2vw, 20px);
+    height: clamp(15px, 2vw, 20px);
+}
+
+.sort-dropdown {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    min-width: 13vw;
+    transform: translateX(-50%);
+    border: 1px solid #12a370;
+    border-radius: 10px;
+    background-color: #fff;
+    padding-inline-start: 0;
+    margin-block-start: 0.5em;
+    font-size: clamp(12px, 1.1vw, 18px);
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sort-dropdown li {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+    list-style: none;
+    border-radius: 9px;
+    white-space: nowrap;
+}
+
+.sort-dropdown li:hover {
+    background-color: #12a370;
+    color: #fff;
+}
+
+.sort-dropdown li svg circle {
+    transition: fill, stroke 0.2s ease;
+}
+
+.sort-dropdown li:hover svg circle {
+    fill: #12a370;
+    stroke: white;
+}
+
+.sort-dropdown svg {
+    margin-left: 2vw;
+}
+
+.see-more-recipes-btn {
+    background: white;
+    color: #12a370;
+    border: 2px solid #12a370;
+    border-radius: 20px;
+    font-size: clamp(14px, 1.2vw, 21px);
+    padding: 0.8vw 1.2vw;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.see-more-container {
+    display: flex;
+    justify-content: center;
+    margin: 1vw 2vw;
+}
+
+@media (max-width: 768px) {
+    .head-container {
+        flex-direction: column;
+        justify-content: center;
+    }
+    .search {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+    }
+    .search-button {
+        padding: 2vw;
+    }
+    .sort-btn {
+        min-width: fit-content;
+        padding: 1.5vw;
+    }
+    .sort-btn p {
+        display: none;
+    }
+    .sort-btn img {
+        display: block;
+        width: clamp(20px, 1.5vw, 24px);
+        height: clamp(20px, 1.5vw, 24px);
+    }
+    .sort-dropdown {
+        min-width: 20vw;
+    }
+}

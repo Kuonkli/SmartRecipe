@@ -1,0 +1,48 @@
+footer {
+    background-color: #12a370;
+    padding: 2vw 5vw;
+    color: white;
+    margin-top: 3vw;
+    align-items: center;
+}
+
+.smart-recipe-text-container {
+    margin-top: 5vh;
+    text-align: center;
+}
+
+.footer-links ul {
+    list-style: none;
+}
+
+.footer-links ul li {
+    margin: 1vw;
+}
+
+.footer-links a {
+    color: white;
+    text-decoration: none;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.footer-social {
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+}
+
+.footer-social .social-icons {
+    display: flex;
+    justify-content: left;
+    gap: 0.5rem;
+}
+
+.social-icon img {
+    width: 24px;
+    height: 24px;
+}

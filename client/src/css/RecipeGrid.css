@@ -1,0 +1,124 @@
+.recipes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3vw;
+    margin: 3vw 5vw 5vw 5vw;
+}
+
+.recipe-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.5vw;
+    border-radius: 20px;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.recipe-card img {
+    width: clamp(120px, 20vw, 310px);
+    height: clamp(120px, 20vw, 310px);
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.recipe-card h3 {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    font-size: clamp(16px, 1.5vw, 25px);
+    padding: 0 3vw;
+    margin-block-end: 1vw;
+}
+
+.recipe-card h4 {
+    width: 100%;
+    font-size: clamp(14px, 1.2vw, 20px);
+    margin: 1vw 0;
+}
+
+.recipe-slider-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.recipe-card:hover {
+    transform: scale(1.08);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+}
+
+.stars {
+    display: flex;
+    align-items: center;
+    margin-top: auto;
+}
+
+.stars h4 {
+    margin-right: 1vw;
+}
+
+.stars span {
+    font-size: clamp(17px, 1.5vw, 25px);
+    color: #ffa500;
+    line-height: 1;
+}
+
+.see-recipe-btn {
+    background: #12a370;
+    color: white;
+    border: 1px solid #12a370;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: clamp(14px, 1.2vw, 21px);
+    padding: 0.8vw 1.2vw;
+    text-decoration: none;
+}
+
+.see-recipe-btn:hover {
+    cursor: pointer;
+}
+
+.slider-btn svg {
+    width: clamp(12px, 3vw, 40px);
+    height: clamp(40px, 3.5vw, 70px);
+}
+
+.slider-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+    height: fit-content;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.8);
+    cursor: default;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    padding-block: 0;
+    padding-inline: 0;
+}
+
+.recipe-slider-container:hover .slider-btn {
+    opacity: 1;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+    .recipes-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .recipe-card img {
+        width: clamp(120px, 30vw, 230px);
+        height: clamp(120px, 30vw, 230px);
+    }
+    .recipe-card:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    .slider-btn {
+        opacity: 1;
+    }
+}

@@ -1,0 +1,136 @@
+.profile-card {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    padding: 3vw;
+    margin: 3vw 5vw;
+    border-radius: 20px;
+}
+
+.user-information-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 80%;
+}
+
+.user-information-container input {
+    margin: 0.5vw;
+    padding: 0.8vw;
+    text-indent: 0.8vw;
+    border: 1px solid dimgray;
+    background-color: white;
+    border-radius: 10px;
+    font-size: clamp(9px, 1.2vw, 16px);
+}
+
+.user-name.editing,
+.user-surname.editing {
+    border-color: #12a370;
+    border-width: 2px;
+}
+
+
+.user-name,
+.user-surname {
+    color: black;
+}
+
+.user-email {
+    color: #4D4545;
+}
+
+.user-information-container p {
+    margin: 0.5vw 1vw;
+    font-size: clamp(9px, 1.2vw, 16px);
+}
+
+.user-profile-control-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 1vw 0.5vw;
+}
+
+.edit-user-profile-btn {
+    background: #12a370;
+    color: white;
+    border: 1px solid #12a370;
+    border-radius: 20px;
+    font-size: clamp(11px, 1.2vw, 21px);
+    padding: 0.8vw 1.2vw;
+    cursor: pointer;
+}
+
+.logout-user-profile-btn {
+    background: white;
+    color: #12a370;
+    border: 1px solid #12a370;
+    border-radius: 20px;
+    font-size: clamp(11px, 1.2vw, 21px);
+    padding: 0.8vw 1.2vw;
+    cursor: pointer;
+}
+
+.save-user-data-btn {
+    background: #12a370;
+    color: white;
+    border: 1px solid #12a370;
+    border-radius: 20px;
+    font-size: clamp(11px, 1.2vw, 21px);
+    padding: 0.8vw 1.2vw;
+    cursor: pointer;
+}
+
+.cancel-editing-btn {
+    background: white;
+    color: #12a370;
+    border: 1px solid #12a370;
+    border-radius: 20px;
+    font-size: clamp(11px, 1.2vw, 21px);
+    padding: 0.8vw 1.2vw;
+    margin-left: 1vw;
+    cursor: pointer;
+}
+
+.user-image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 25%;
+    margin-right: 3vw;
+    overflow: hidden;
+}
+
+.user-image-container img {
+    width: 70%;
+    object-fit: cover;
+    clip-path: circle(40% at center);
+    transform: scale(1.5);
+}
+
+.profile-head-lines {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 5vw;
+}
+
+.profile-head-lines h1 {
+    font-size: clamp(20px, 2.5vw, 30px);
+}
+
+.profile-head-lines a {
+    color: #12a370;
+    text-decoration: none;
+    font-size: clamp(12px, 1.3vw, 20px);
+}
+
+.default-profile-recipes-text {
+    text-align: center;
+    color: #4d4545;
+    margin: 2.5vw 0;
+    font-size: clamp(12px, 1.3vw, 20px);
+}
